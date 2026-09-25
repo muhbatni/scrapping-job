@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+*/node_modules/
+**/node_modules/
+
+# Production / Build output
+dist/
+*/dist/
+**/dist/
+build/
+
+# Environment files
+.env
+.env.local
+*.env
+
+# Uploads & Storage
+uploads/
+backend/uploads/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
