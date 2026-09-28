@@ -1,9 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as fs from 'fs';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  // Ensure upload directories exist
+  fs.mkdirSync('./uploads/cv', { recursive: true });
+  fs.mkdirSync('./uploads/screenshots', { recursive: true });
+
   const app = await NestFactory.create(AppModule);
 
   // Global prefix

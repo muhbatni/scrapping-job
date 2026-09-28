@@ -22,6 +22,8 @@ export class ApplicationsService {
   }
 
   async findAll(userId: string, status?: ApplicationStatus, page = 1, limit = 20) {
+    const p = Math.max(1, Number(page) || 1);
+    const l = Math.max(1, Number(limit) || 20);
     const where: any = { userId };
     if (status) where.status = status;
 
@@ -29,13 +31,13 @@ export class ApplicationsService {
       where,
       relations: ['job', 'job.source'],
       order: { updatedAt: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit,
+      skip: (p - 1) * l,
+      take: l,
     });
 
     return {
       data,
-      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+      meta: { total, page: p, limit: l, totalPages: Math.ceil(total / l) },
     };
   }
 
@@ -91,7 +93,7 @@ export class ApplicationsService {
   async getMonthlyStats(userId: string) {
     const stats = await this.appRepo
       .createQueryBuilder('app')
-      .select("TO_CHAR(app.createdAt, 'YYYY-MM')", 'month')
+      .select("TO_CHAR(app.created_at, 'YYYY-MM')", 'month')
       .addSelect('app.status', 'status')
       .addSelect('COUNT(*)', 'count')
       .where('app.userId = :userId', { userId })

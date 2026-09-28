@@ -1,15 +1,11 @@
--- ===========================================
 -- Job Apply Assistant Indonesia
 -- Database Initialization Script
--- ===========================================
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
--- ===========================================
 -- ENUMS
--- ===========================================
 
 CREATE TYPE user_role AS ENUM ('admin', 'user');
 CREATE TYPE work_type AS ENUM ('remote', 'hybrid', 'onsite');
@@ -23,9 +19,7 @@ CREATE TYPE crawl_status AS ENUM ('pending', 'running', 'completed', 'failed');
 CREATE TYPE job_source_type AS ENUM ('job_board', 'company_career');
 CREATE TYPE notification_type AS ENUM ('new_job', 'favorite_company', 'status_change');
 
--- ===========================================
 -- USERS
--- ===========================================
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   email VARCHAR(255) UNIQUE NOT NULL,
@@ -36,9 +30,7 @@ CREATE TABLE users (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- ===========================================
 -- USER PROFILES
--- ===========================================
 CREATE TABLE user_profiles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -57,9 +49,7 @@ CREATE TABLE user_profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- ===========================================
 -- SKILLS
--- ===========================================
 CREATE TABLE skills (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -68,9 +58,7 @@ CREATE TABLE skills (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- ===========================================
 -- EDUCATION
--- ===========================================
 CREATE TABLE education (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -85,9 +73,7 @@ CREATE TABLE education (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- ===========================================
 -- EXPERIENCE
--- ===========================================
 CREATE TABLE experiences (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -102,9 +88,7 @@ CREATE TABLE experiences (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- ===========================================
 -- JOB SOURCES (Job Boards & Company Career Pages)
--- ===========================================
 CREATE TABLE job_sources (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name VARCHAR(255) NOT NULL,
@@ -117,9 +101,7 @@ CREATE TABLE job_sources (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- ===========================================
 -- JOBS (Lowongan Kerja)
--- ===========================================
 CREATE TABLE jobs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   source_id UUID REFERENCES job_sources(id) ON DELETE SET NULL,
@@ -148,9 +130,7 @@ CREATE TABLE jobs (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- ===========================================
 -- JOB BOOKMARKS
--- ===========================================
 CREATE TABLE job_bookmarks (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -159,9 +139,7 @@ CREATE TABLE job_bookmarks (
   UNIQUE(user_id, job_id)
 );
 
--- ===========================================
 -- JOB VIEWS
--- ===========================================
 CREATE TABLE job_views (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -170,9 +148,7 @@ CREATE TABLE job_views (
   UNIQUE(user_id, job_id)
 );
 
--- ===========================================
 -- APPLICATIONS (Lamaran)
--- ===========================================
 CREATE TABLE applications (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -188,9 +164,7 @@ CREATE TABLE applications (
   UNIQUE(user_id, job_id)
 );
 
--- ===========================================
 -- APPLICATION STATUS HISTORY
--- ===========================================
 CREATE TABLE application_status_history (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
@@ -200,9 +174,7 @@ CREATE TABLE application_status_history (
   changed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- ===========================================
 -- CRAWL LOGS
--- ===========================================
 CREATE TABLE crawl_logs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   source_id UUID REFERENCES job_sources(id) ON DELETE SET NULL,
@@ -220,9 +192,7 @@ CREATE TABLE crawl_logs (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- ===========================================
 -- AUTO APPLY LOGS
--- ===========================================
 CREATE TABLE auto_apply_logs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   application_id UUID REFERENCES applications(id) ON DELETE SET NULL,
@@ -237,9 +207,7 @@ CREATE TABLE auto_apply_logs (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- ===========================================
 -- NOTIFICATIONS
--- ===========================================
 CREATE TABLE notifications (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -251,9 +219,7 @@ CREATE TABLE notifications (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- ===========================================
 -- FAVORITE COMPANIES
--- ===========================================
 CREATE TABLE favorite_companies (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -262,9 +228,7 @@ CREATE TABLE favorite_companies (
   UNIQUE(user_id, company_name)
 );
 
--- ===========================================
 -- KEYWORD ALERTS
--- ===========================================
 CREATE TABLE keyword_alerts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -273,9 +237,7 @@ CREATE TABLE keyword_alerts (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- ===========================================
 -- INDEXES
--- ===========================================
 CREATE INDEX idx_jobs_title ON jobs USING gin(title gin_trgm_ops);
 CREATE INDEX idx_jobs_company ON jobs USING gin(company gin_trgm_ops);
 CREATE INDEX idx_jobs_location ON jobs(location);
@@ -303,16 +265,12 @@ CREATE INDEX idx_crawl_logs_source_id ON crawl_logs(source_id);
 CREATE INDEX idx_crawl_logs_status ON crawl_logs(status);
 CREATE INDEX idx_crawl_logs_created_at ON crawl_logs(created_at);
 
--- ===========================================
 -- SEED DATA: Default Admin User
 -- Password: admin123 (bcrypt hashed)
--- ===========================================
 INSERT INTO users (email, password, role) VALUES
   ('admin@jobassist.id', '$2b$10$Ctz6U0eKKz0tcrG7W3TT.enUYAzLg.lsETcP3eZloiOiwUiCahusa', 'admin');
 
--- ===========================================
 -- SEED DATA: Default Job Sources
--- ===========================================
 INSERT INTO job_sources (name, type, base_url, is_active, crawl_config) VALUES
   ('Jobstreet', 'job_board', 'https://www.jobstreet.co.id', true, '{"searchPath": "/id/job-search", "selectors": {"title": ".job-title", "company": ".company-name", "location": ".location"}}'),
   ('LinkedIn Jobs', 'job_board', 'https://www.linkedin.com/jobs', true, '{"searchPath": "/search", "selectors": {"title": ".base-search-card__title", "company": ".base-search-card__subtitle", "location": ".job-search-card__location"}}'),
@@ -326,9 +284,7 @@ INSERT INTO job_sources (name, type, base_url, is_active, crawl_config) VALUES
   ('Loker.id', 'job_board', 'https://www.loker.id', true, '{"searchPath": "/cari-lowongan-kerja", "selectors": {}}'),
   ('TopKarir', 'job_board', 'https://www.topkarir.com', true, '{"searchPath": "/lowongan-kerja", "selectors": {}}');
 
--- ===========================================
 -- SEED DATA: Default Company Career Pages
--- ===========================================
 INSERT INTO job_sources (name, type, base_url, is_active, crawl_config) VALUES
   ('Gojek Careers', 'company_career', 'https://www.gotocompany.com/careers', true, '{"selectors": {"jobList": ".career-list", "title": ".job-title", "location": ".job-location"}}'),
   ('Tokopedia Careers', 'company_career', 'https://www.tokopedia.com/careers', true, '{"selectors": {}}'),

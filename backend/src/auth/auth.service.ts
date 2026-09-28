@@ -25,8 +25,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(email: string, password: string): Promise<AuthResponse> {
-    const user = await this.usersService.create(email, password);
+  async register(email: string, password: string, fullName?: string): Promise<AuthResponse> {
+    const user = await this.usersService.create(email, password, undefined, fullName);
     return this.generateToken(user);
   }
 

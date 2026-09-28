@@ -13,7 +13,7 @@ COPY package.json ./
 RUN npm install --omit=dev
 COPY --from=builder /app/dist ./dist
 
-RUN mkdir -p /app/uploads
+RUN mkdir -p /app/uploads/cv /app/uploads/screenshots
 
 EXPOSE 3000
 CMD ["node", "dist/main"]

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, UserRole } from './user.entity';
+import { UserProfile } from '../profiles/user-profile.entity';
 
 @Injectable()
 export class UsersService {
@@ -11,7 +12,7 @@ export class UsersService {
     private readonly userRepo: Repository<User>,
   ) {}
 
-  async create(email: string, password: string, role: UserRole = UserRole.USER): Promise<User> {
+  async create(email: string, password: string, role: UserRole = UserRole.USER, fullName?: string): Promise<User> {
     const existing = await this.userRepo.findOne({ where: { email } });
     if (existing) {
       throw new ConflictException('Email sudah terdaftar');
@@ -26,7 +27,16 @@ export class UsersService {
       role,
     });
 
-    return this.userRepo.save(user);
+    const saved = await this.userRepo.save(user);
+
+    if (fullName) {
+      await this.userRepo.manager.save(UserProfile, {
+        userId: saved.id,
+        fullName,
+      });
+    }
+
+    return saved;
   }
 
   async findByEmail(email: string): Promise<User | null> {

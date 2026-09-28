@@ -1,7 +1,5 @@
 services:
-  # ============================================
   # PostgreSQL Database
-  # ============================================
   postgres:
     image: postgres:16-alpine
     container_name: jobassist-postgres
@@ -23,9 +21,7 @@ services:
     networks:
       - jobassist-network
 
-  # ============================================
   # Backend API (NestJS)
-  # ============================================
   backend-api:
     build:
       context: ./backend
@@ -56,9 +52,7 @@ services:
     networks:
       - jobassist-network
 
-  # ============================================
   # Crawler Service (Playwright + Cheerio)
-  # ============================================
   crawler-service:
     build:
       context: ./crawler
@@ -85,9 +79,7 @@ services:
     networks:
       - jobassist-network
 
-  # ============================================
   # Scheduler Service (Cron Jobs)
-  # ============================================
   scheduler-service:
     build:
       context: ./scheduler
@@ -115,9 +107,7 @@ services:
     networks:
       - jobassist-network
 
-  # ============================================
   # Frontend (Vue.js 3 + Vite)
-  # ============================================
   frontend:
     build:
       context: ./frontend

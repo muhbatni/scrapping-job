@@ -36,7 +36,7 @@ export class DashboardService {
 
     const monthlyStats = await this.appRepo
       .createQueryBuilder('app')
-      .select("TO_CHAR(app.createdAt, 'YYYY-MM')", 'month')
+      .select("TO_CHAR(app.created_at, 'YYYY-MM')", 'month')
       .addSelect('COUNT(*)', 'count')
       .where('app.userId = :userId', { userId })
       .andWhere("app.created_at >= NOW() - INTERVAL '12 months'")

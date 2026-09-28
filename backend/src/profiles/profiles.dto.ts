@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsNumber, Min, Max, IsDate } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class UpdateProfileDto {
@@ -30,6 +30,8 @@ export class CreateEducationDto {
   @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
 }
 
+export class UpdateEducationDto extends PartialType(CreateEducationDto) {}
+
 export class CreateExperienceDto {
   @ApiProperty({ example: 'PT Tokopedia' }) @IsString() company: string;
   @ApiProperty({ example: 'Software Engineer' }) @IsString() position: string;
@@ -39,3 +41,6 @@ export class CreateExperienceDto {
   @ApiPropertyOptional() @IsOptional() isCurrent?: boolean;
   @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
 }
+
+export class UpdateExperienceDto extends PartialType(CreateExperienceDto) {}
+

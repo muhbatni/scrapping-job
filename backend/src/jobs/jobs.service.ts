@@ -64,8 +64,8 @@ export class JobsService {
     qb.orderBy(`job.${sortField}`, sortOrder as 'ASC' | 'DESC');
 
     // Pagination
-    const page = dto.page || 1;
-    const limit = dto.limit || 20;
+    const page = Math.max(1, Number(dto.page) || 1);
+    const limit = Math.max(1, Number(dto.limit) || 20);
     qb.skip((page - 1) * limit).take(limit);
 
     const [data, total] = await qb.getManyAndCount();
@@ -107,11 +107,13 @@ export class JobsService {
   }
 
   async getBookmarks(userId: string, page = 1, limit = 20) {
+    const p = Math.max(1, Number(page) || 1);
+    const l = Math.max(1, Number(limit) || 20);
     const [bookmarks, total] = await this.bookmarkRepo.findAndCount({
       where: { userId },
       order: { createdAt: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit,
+      skip: (p - 1) * l,
+      take: l,
     });
 
     const jobIds = bookmarks.map((b) => b.jobId);
@@ -121,7 +123,7 @@ export class JobsService {
 
     return {
       data: jobs,
-      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+      meta: { total, page: p, limit: l, totalPages: Math.ceil(total / l) },
     };
   }
 

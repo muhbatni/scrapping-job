@@ -6,7 +6,14 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/user.entity';
 import { ProfilesService } from './profiles.service';
-import { UpdateProfileDto, CreateSkillDto, CreateEducationDto, CreateExperienceDto } from './profiles.dto';
+import {
+  UpdateProfileDto,
+  CreateSkillDto,
+  CreateEducationDto,
+  UpdateEducationDto,
+  CreateExperienceDto,
+  UpdateExperienceDto,
+} from './profiles.dto';
 
 @ApiTags('profiles')
 @ApiBearerAuth()
@@ -15,7 +22,7 @@ import { UpdateProfileDto, CreateSkillDto, CreateEducationDto, CreateExperienceD
 export class ProfilesController {
   constructor(private readonly profilesService: ProfilesService) {}
 
-  // =================== Profile ===================
+  // Profile endpoints
   @Get('me')
   @ApiOperation({ summary: 'Get current user profile' })
   getProfile(@CurrentUser() user: User) {
@@ -28,7 +35,7 @@ export class ProfilesController {
     return this.profilesService.updateProfile(user.id, dto);
   }
 
-  // =================== Skills ===================
+  // Skills endpoints
   @Get('skills')
   @ApiOperation({ summary: 'Get user skills' })
   getSkills(@CurrentUser() user: User) {
@@ -47,7 +54,7 @@ export class ProfilesController {
     return this.profilesService.removeSkill(id, user.id);
   }
 
-  // =================== Education ===================
+  // Education endpoints
   @Get('education')
   @ApiOperation({ summary: 'Get user education history' })
   getEducation(@CurrentUser() user: User) {
@@ -62,7 +69,7 @@ export class ProfilesController {
 
   @Put('education/:id')
   @ApiOperation({ summary: 'Update education' })
-  updateEducation(@CurrentUser() user: User, @Param('id') id: string, @Body() dto: CreateEducationDto) {
+  updateEducation(@CurrentUser() user: User, @Param('id') id: string, @Body() dto: UpdateEducationDto) {
     return this.profilesService.updateEducation(id, user.id, dto);
   }
 
@@ -72,7 +79,7 @@ export class ProfilesController {
     return this.profilesService.removeEducation(id, user.id);
   }
 
-  // =================== Experience ===================
+  // Experience endpoints
   @Get('experiences')
   @ApiOperation({ summary: 'Get user experiences' })
   getExperiences(@CurrentUser() user: User) {
@@ -87,7 +94,7 @@ export class ProfilesController {
 
   @Put('experiences/:id')
   @ApiOperation({ summary: 'Update experience' })
-  updateExperience(@CurrentUser() user: User, @Param('id') id: string, @Body() dto: CreateExperienceDto) {
+  updateExperience(@CurrentUser() user: User, @Param('id') id: string, @Body() dto: UpdateExperienceDto) {
     return this.profilesService.updateExperience(id, user.id, dto);
   }
 

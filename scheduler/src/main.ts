@@ -40,10 +40,7 @@ const pool = new Pool({
 // Track scheduled jobs
 const scheduledJobs: Map<string, cron.ScheduledTask> = new Map();
 
-// ============================================
 // Cron Jobs
-// ============================================
-
 // 1. Crawl all job boards every 6 hours
 const crawlAllJob = cron.schedule('0 */6 * * *', async () => {
   logger.info('⏰ Scheduled crawl: All job boards');
@@ -152,10 +149,7 @@ const cleanupJob = cron.schedule('0 0 * * *', async () => {
 }, { scheduled: true });
 scheduledJobs.set('cleanup-expired', cleanupJob);
 
-// ============================================
 // API Endpoints
-// ============================================
-
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'scheduler' });
 });

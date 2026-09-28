@@ -10,14 +10,16 @@ export class NotificationsService {
   ) {}
 
   async findAll(userId: string, page = 1, limit = 20) {
+    const p = Math.max(1, Number(page) || 1);
+    const l = Math.max(1, Number(limit) || 20);
     const [data, total] = await this.notifRepo.findAndCount({
       where: { userId },
       order: { createdAt: 'DESC' },
-      skip: (page - 1) * limit,
-      take: limit,
+      skip: (p - 1) * l,
+      take: l,
     });
 
-    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+    return { data, meta: { total, page: p, limit: l, totalPages: Math.ceil(total / l) } };
   }
 
   async getUnreadCount(userId: string): Promise<number> {
