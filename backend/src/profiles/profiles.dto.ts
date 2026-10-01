@@ -12,6 +12,7 @@ export class UpdateProfileDto {
   @ApiPropertyOptional() @IsOptional() @IsString() city?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() province?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() summary?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() cvFilePath?: string;
   @ApiPropertyOptional() @IsOptional() @IsString() coverLetterTemplate?: string;
 }
 
@@ -19,6 +20,8 @@ export class CreateSkillDto {
   @ApiProperty({ example: 'TypeScript' }) @IsString() name: string;
   @ApiPropertyOptional({ example: 3 }) @IsOptional() @IsNumber() @Min(1) @Max(5) level?: number;
 }
+
+export class UpdateSkillDto extends PartialType(CreateSkillDto) {}
 
 export class CreateEducationDto {
   @ApiProperty({ example: 'Universitas Indonesia' }) @IsString() institution: string;

@@ -17,7 +17,7 @@ async function loadNotifications() {
     api.get('/notifications/unread-count'),
   ])
   notifications.value = notifsRes.data.data
-  unreadCount.value = countRes.data
+  unreadCount.value = countRes.data?.count !== undefined ? countRes.data.count : Number(countRes.data || 0)
 }
 
 async function markAsRead(id: string) {

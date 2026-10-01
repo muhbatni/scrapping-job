@@ -1,15 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import * as fs from 'fs';
+import * as path from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  const uploadDir = process.env.UPLOAD_DIR || './uploads';
   // Ensure upload directories exist
-  fs.mkdirSync('./uploads/cv', { recursive: true });
-  fs.mkdirSync('./uploads/screenshots', { recursive: true });
+  fs.mkdirSync(path.join(uploadDir, 'cv'), { recursive: true });
+  fs.mkdirSync(path.join(uploadDir, 'screenshots'), { recursive: true });
 
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Serve static uploads
+  app.useStaticAssets(path.resolve(uploadDir), {
+    prefix: '/uploads/',
+  });
 
   // Global prefix
   app.setGlobalPrefix('api');
@@ -25,7 +33,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: true,
+      forbidNonWhitelisted: false,
       transform: true,
       transformOptions: {
         enableImplicitConversion: true,

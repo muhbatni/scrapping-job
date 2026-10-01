@@ -9,6 +9,7 @@ import { ProfilesService } from './profiles.service';
 import {
   UpdateProfileDto,
   CreateSkillDto,
+  UpdateSkillDto,
   CreateEducationDto,
   UpdateEducationDto,
   CreateExperienceDto,
@@ -46,6 +47,16 @@ export class ProfilesController {
   @ApiOperation({ summary: 'Add a skill' })
   addSkill(@CurrentUser() user: User, @Body() dto: CreateSkillDto) {
     return this.profilesService.addSkill(user.id, dto.name, dto.level);
+  }
+
+  @Put('skills/:id')
+  @ApiOperation({ summary: 'Update a skill' })
+  updateSkill(
+    @CurrentUser() user: User,
+    @Param('id') id: string,
+    @Body() dto: UpdateSkillDto,
+  ) {
+    return this.profilesService.updateSkill(id, user.id, dto);
   }
 
   @Delete('skills/:id')

@@ -81,12 +81,15 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
   const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const isGuestOnly = to.matched.some((record) => record.meta.guest)
+  const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin)
 
-  if (to.meta.requiresAuth && !token) {
+  if (requiresAuth && !token) {
     next('/login')
-  } else if (to.meta.guest && token) {
+  } else if (isGuestOnly && token) {
     next('/')
-  } else if (to.meta.requiresAdmin && user.role !== 'admin') {
+  } else if (requiresAdmin && user.role !== 'admin') {
     next('/')
   } else {
     next()

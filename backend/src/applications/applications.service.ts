@@ -83,9 +83,11 @@ export class ApplicationsService {
       .groupBy('app.status')
       .getRawMany();
 
-    const result: Record<string, number> = {};
+    const result: Record<string, number> = { total: 0 };
     for (const s of stats) {
-      result[s.status] = parseInt(s.count);
+      const count = parseInt(s.count);
+      result[s.status] = count;
+      result.total += count;
     }
     return result;
   }

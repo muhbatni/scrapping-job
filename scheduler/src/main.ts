@@ -65,11 +65,11 @@ const crawlCompaniesJob = cron.schedule('0 */12 * * *', async () => {
 }, { scheduled: true });
 scheduledJobs.set('crawl-companies', crawlCompaniesJob);
 
-// 3. Check for new matching jobs every hour (notification)
-const notifyNewJobsJob = cron.schedule('0 * * * *', async () => {
+// Task functions
+async function runNotifyNewJobs() {
   logger.info('⏰ Checking for new job matches');
+  let notifCount = 0;
   try {
-    // Get keyword alerts
     const { rows: alerts } = await pool.query(
       'SELECT ka.*, u.id as user_id FROM keyword_alerts ka JOIN users u ON ka.user_id = u.id WHERE ka.is_active = true'
     );
@@ -95,10 +95,10 @@ const notifyNewJobsJob = cron.schedule('0 * * * *', async () => {
             JSON.stringify({ jobId: job.id }),
           ]
         );
+        notifCount++;
       }
     }
 
-    // Check favorite companies
     const { rows: favorites } = await pool.query(
       `SELECT fc.*, u.id as user_id FROM favorite_companies fc JOIN users u ON fc.user_id = u.id`
     );
@@ -124,18 +124,19 @@ const notifyNewJobsJob = cron.schedule('0 * * * *', async () => {
             JSON.stringify({ jobId: job.id }),
           ]
         );
+        notifCount++;
       }
     }
 
-    logger.info('Job match notifications sent');
+    logger.info(`Job match notifications sent (${notifCount} notifications)`);
+    return { notificationsSent: notifCount };
   } catch (error: any) {
     logger.error('Notification check failed', { error: error.message });
+    throw error;
   }
-}, { scheduled: true });
-scheduledJobs.set('notify-new-jobs', notifyNewJobsJob);
+}
 
-// 4. Clean up expired jobs daily at midnight
-const cleanupJob = cron.schedule('0 0 * * *', async () => {
+async function runCleanupExpired() {
   logger.info('⏰ Cleaning up expired jobs');
   try {
     const result = await pool.query(
@@ -143,9 +144,22 @@ const cleanupJob = cron.schedule('0 0 * * *', async () => {
        WHERE expires_at IS NOT NULL AND expires_at < NOW() AND is_active = true`
     );
     logger.info(`Deactivated ${result.rowCount} expired jobs`);
+    return { deactivated: result.rowCount };
   } catch (error: any) {
     logger.error('Cleanup failed', { error: error.message });
+    throw error;
   }
+}
+
+// 3. Check for new matching jobs every hour (notification)
+const notifyNewJobsJob = cron.schedule('0 * * * *', async () => {
+  await runNotifyNewJobs().catch(() => {});
+}, { scheduled: true });
+scheduledJobs.set('notify-new-jobs', notifyNewJobsJob);
+
+// 4. Clean up expired jobs daily at midnight
+const cleanupJob = cron.schedule('0 0 * * *', async () => {
+  await runCleanupExpired().catch(() => {});
 }, { scheduled: true });
 scheduledJobs.set('cleanup-expired', cleanupJob);
 
@@ -167,16 +181,28 @@ app.post('/trigger/:jobName', async (req, res) => {
 
   try {
     switch (jobName) {
-      case 'crawl-all':
+      case 'crawl-all': {
         const crawlResponse = await axios.post(`${CRAWLER_URL}/crawl/all`, {}, { timeout: 600000 });
         res.json({ success: true, result: crawlResponse.data });
         break;
-      case 'crawl-companies':
+      }
+      case 'crawl-companies': {
         const companyResponse = await axios.post(`${CRAWLER_URL}/crawl/companies`, {}, { timeout: 600000 });
         res.json({ success: true, result: companyResponse.data });
         break;
+      }
+      case 'notify-new-jobs': {
+        const result = await runNotifyNewJobs();
+        res.json({ success: true, result });
+        break;
+      }
+      case 'cleanup-expired': {
+        const result = await runCleanupExpired();
+        res.json({ success: true, result });
+        break;
+      }
       default:
-        res.status(404).json({ error: 'Job not found' });
+        res.status(404).json({ error: `Job ${jobName} not found` });
     }
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { User } from '../users/user.entity';
 import { Job } from '../jobs/job.entity';
 import { JobBookmark } from '../jobs/job-interaction.entity';
 import { Application, ApplicationStatus } from '../applications/application.entity';
@@ -9,6 +10,7 @@ import { CrawlLog } from '../crawl-logs/crawl-log.entity';
 @Injectable()
 export class DashboardService {
   constructor(
+    @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Job) private jobRepo: Repository<Job>,
     @InjectRepository(JobBookmark) private bookmarkRepo: Repository<JobBookmark>,
     @InjectRepository(Application) private appRepo: Repository<Application>,
@@ -72,6 +74,7 @@ export class DashboardService {
     const totalJobs = await this.jobRepo.count();
     const activeJobs = await this.jobRepo.count({ where: { isActive: true } });
     const totalApplications = await this.appRepo.count();
+    const totalUsers = await this.userRepo.count();
 
     const recentCrawls = await this.crawlRepo.find({
       relations: ['source'],
@@ -90,6 +93,7 @@ export class DashboardService {
       totalJobs,
       activeJobs,
       totalApplications,
+      totalUsers,
       recentCrawls,
       crawlStats,
     };

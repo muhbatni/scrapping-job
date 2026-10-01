@@ -30,7 +30,7 @@ onMounted(async () => {
 
     <div v-else>
       <!-- Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="stat-card">
           <p class="text-sm text-dark-400">Total Lowongan</p>
           <p class="text-3xl font-bold text-white">{{ dashboard?.totalJobs?.toLocaleString() || 0 }}</p>
@@ -42,6 +42,10 @@ onMounted(async () => {
         <div class="stat-card">
           <p class="text-sm text-dark-400">Total Lamaran</p>
           <p class="text-3xl font-bold text-primary-400">{{ dashboard?.totalApplications?.toLocaleString() || 0 }}</p>
+        </div>
+        <div class="stat-card">
+          <p class="text-sm text-dark-400">Total Pengguna</p>
+          <p class="text-3xl font-bold text-sky-400">{{ dashboard?.totalUsers?.toLocaleString() || 0 }}</p>
         </div>
       </div>
 
